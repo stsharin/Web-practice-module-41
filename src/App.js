@@ -26,6 +26,8 @@ function App() {
     firebase.auth().signInWithPopup(provider)
       .then(res => {
         const { displayName, photoURL, email } = res.user;
+        // console.log(res);
+        // console.log(displayName, photoURL, email);
         const signedInUser = {
           isSignedIn: true,
           name: displayName,
@@ -33,8 +35,6 @@ function App() {
           photo: photoURL
         }
         setUser(signedInUser);
-        // console.log(res);
-        // console.log(displayName, photoURL, email);
       })
       .catch(err => {
         console.log(err);
@@ -61,6 +61,16 @@ function App() {
   const handleBlur = (e) => {
     // detecting the field and value
     console.log(e.target.name, e.target.value);
+    if(e.target.name==='email'){
+      const isEmailValid = /\S+@\S+\.\S+/.test(e.target.value);
+      console.log(isEmailValid);
+    }
+    if(e.target.name === 'password'){
+      const isPasswordValid = e.target.value.length > 6;
+      const passwordHasNumber = /\d{3}/.test(e.target.value);
+      // both conditions has to be true
+      console.log(isPasswordValid && passwordHasNumber); 
+    }
   }
 
   const handleSubmit = () => {
