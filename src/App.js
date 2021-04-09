@@ -14,13 +14,15 @@ else {
 }
 
 function App() {
+  // object with multiple values
   const [user, setUser] = useState({
     isSignedIn: false,
     name: '',
     email: '',
+    password: '',
     photo: ''
-  }) // object with multiple values
-
+  }) 
+  // Google sign in authentication
   const provider = new firebase.auth.GoogleAuthProvider();
   const handleSignIn = () => {
     firebase.auth().signInWithPopup(provider)
@@ -60,16 +62,31 @@ function App() {
 
   const handleBlur = (e) => {
     // detecting the field and value
-    console.log(e.target.name, e.target.value);
-    if(e.target.name==='email'){
-      const isEmailValid = /\S+@\S+\.\S+/.test(e.target.value);
-      console.log(isEmailValid);
+    // console.log(e.target.name, e.target.value);
+    // if (e.target.name === 'email') {
+    //   const isEmailValid = /\S+@\S+\.\S+/.test(e.target.value);
+    //   console.log(isEmailValid);
+    // debugger;  to debug
+
+    // form validation checking
+    let isFieldValid = true;
+    if (e.target.name === 'email') {
+      isFieldValid = /\S+@\S+\.\S+/.test(e.target.value);
+      // console.log(isFormValid);
     }
-    if(e.target.name === 'password'){
+    if (e.target.name === 'password') {
       const isPasswordValid = e.target.value.length > 6;
       const passwordHasNumber = /\d{3}/.test(e.target.value);
       // both conditions has to be true
-      console.log(isPasswordValid && passwordHasNumber); 
+      isFieldValid = (isPasswordValid && passwordHasNumber);
+    }
+    // if the condition is true then it will set the new email and pass of the user
+    if(isFieldValid){
+      // [... coping array, adding new item] 
+      // [...card, newItem]
+      const newUserInfo = {...user};
+      newUserInfo[e.target.name] = e.target.value;
+      setUser(newUserInfo);
     }
   }
 
@@ -92,13 +109,18 @@ function App() {
         </div>
       }
       <h1>Our Own Authentication</h1>
+      {/* <p>Name: {user.name}</p>
+      <p>Email: {user.email}</p>
+      <p>Password: {user.password}</p> */}
       <form onSubmit={handleSubmit}>
-        <input name="email" onBlur={handleBlur} type="text" id="" placeholder="Your Email" required/>
+        <input type="text" onBlur={handleBlur} name="name" id="" placeholder="Your name" required/>
         <br/>
-        <input name="password" onBlur={handleBlur} type="password" id="" placeholder="Your Password" required/>
-        <br/>
+        <input name="email" onBlur={handleBlur} type="text" id="" placeholder="Your Email" required />
+        <br />
+        <input name="password" onBlur={handleBlur} type="password" id="" placeholder="Your Password" required />
+        <br />
         {/* <button>Submit</button> */}
-        <input type="submit" value="Submit"/>
+        <input type="submit" value="Submit" />
       </form>
     </div>
   );
