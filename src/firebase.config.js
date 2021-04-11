@@ -1,3 +1,4 @@
+// form firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCs3DoQ_PY6imoSLIzSPUPpjz-X3N91uJ8",
     authDomain: "ema-john-main.firebaseapp.com",

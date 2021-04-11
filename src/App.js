@@ -14,6 +14,7 @@ else {
 }
 
 function App() {
+  const [newUser, setNewUser] = useState(false);
   // object with multiple values
   const [user, setUser] = useState({
     isSignedIn: false,
@@ -21,7 +22,7 @@ function App() {
     email: '',
     password: '',
     photo: ''
-  }) 
+  })
   // Google sign in authentication
   const provider = new firebase.auth.GoogleAuthProvider();
   const handleSignIn = () => {
@@ -51,6 +52,8 @@ function App() {
           isSignedIn: false,
           name: '',
           email: '',
+          error: '',
+          success: '',
           photo: ''
         }
         setUser(signedOutUser);
@@ -81,17 +84,68 @@ function App() {
       isFieldValid = (isPasswordValid && passwordHasNumber);
     }
     // if the condition is true then it will set the new email and pass of the user
-    if(isFieldValid){
+    if (isFieldValid) {
       // [... coping array, adding new item] 
       // [...card, newItem]
-      const newUserInfo = {...user};
+      const newUserInfo = { ...user };
       newUserInfo[e.target.name] = e.target.value;
       setUser(newUserInfo);
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    console.log(user.email, user.password);
+    if (user.email && user.password) {
+      // console.log('submitting');
+      // creating user
+      firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
+        .then((userCredential) => {
+          const newUserInfo = { ...user };
+          newUserInfo.error = '';
+          newUserInfo.success = true;
+          setUser(newUserInfo);
+          updateUserName(user.name);
+        })
+        .catch(error => {
+          // var errorCode = error.code;
+          // var errorMessage = error.message;
+          // console.log(errorCode, errorMessage);
+          const newUserInfo = { ...user };
+          newUserInfo.error = error.message;
+          newUserInfo.success = false;
+          setUser(newUserInfo);
+        });
+    }
+    if (!newUser && user.email && user.password) {
+      firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+        .then(res => {
+          const newUserInfo = { ...user };
+          newUserInfo.error = '';
+          newUserInfo.success = true;
+          setUser(newUserInfo);
+          console.log('signed in user info', res.user);
+        })
+        .catch((error) => {
+          const newUserInfo = { ...user };
+          newUserInfo.error = error.message;
+          newUserInfo.success = false;
+          setUser(newUserInfo);
+        });
+    }
+    const updateUserName = name => {
+      const user = firebase.auth().currentUser;
 
+      user.updateProfile({
+        displayName: name
+      }).then(function () {
+        console.log('user name updated successfully');
+      }).catch(function (error) {
+        console.log(error);
+      });
+    }
+
+    // page will not refresh as default
+    e.preventDefault();
   }
 
   return (
@@ -112,16 +166,25 @@ function App() {
       {/* <p>Name: {user.name}</p>
       <p>Email: {user.email}</p>
       <p>Password: {user.password}</p> */}
+
+      {/* toggle new user */}
+      <input type="checkbox" onChange={() => setNewUser(!newUser)} name="newUser" id="" />
+      <label htmlFor="newUser">New User Sign Up</label>
+
       <form onSubmit={handleSubmit}>
-        <input type="text" onBlur={handleBlur} name="name" id="" placeholder="Your name" required/>
-        <br/>
+        {newUser && <input type="text" onBlur={handleBlur} name="name" id="" placeholder="Your name" />}
+        <br />
         <input name="email" onBlur={handleBlur} type="text" id="" placeholder="Your Email" required />
         <br />
         <input name="password" onBlur={handleBlur} type="password" id="" placeholder="Your Password" required />
         <br />
         {/* <button>Submit</button> */}
-        <input type="submit" value="Submit" />
+        <input type="submit" value={newUser ? 'Sign in' : 'Sign up'} />
       </form>
+      <p style={{ color: 'red' }}>{user.error}</p>
+      {/* conditions */}
+      {user.success && <p style={{ color: 'green' }}>User {newUser ? 'created' : 'Logged in'} successfully</p>}
+
     </div>
   );
 }
