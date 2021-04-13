@@ -5,7 +5,6 @@ import firebaseConfig from './firebase.config';
 import { useState } from 'react';
 
 // firebase.initializeApp(firebaseConfig);
-
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -15,7 +14,7 @@ else {
 
 function App() {
   const [newUser, setNewUser] = useState(false);
-  // object with multiple values
+  // state -> object with multiple values
   const [user, setUser] = useState({
     isSignedIn: false,
     name: '',
@@ -24,9 +23,13 @@ function App() {
     photo: ''
   })
   // Google sign in authentication
-  const provider = new firebase.auth.GoogleAuthProvider();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  // FB sign in authentication
+  const fbProvider = new firebase.auth.FacebookAuthProvider();
+
+  // code for sign in
   const handleSignIn = () => {
-    firebase.auth().signInWithPopup(provider)
+    firebase.auth().signInWithPopup(googleProvider)
       .then(res => {
         const { displayName, photoURL, email } = res.user;
         // console.log(res);
@@ -44,6 +47,29 @@ function App() {
         console.log(err.message);
       })
   }
+  // FB sign in
+  const handleFBSignIn = () => {
+    firebase.auth().signInWithPopup(fbProvider).then((result) => {
+      var credential = result.credential;
+      // The signed-in user info.
+      var user = result.user;
+      // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+      var accessToken = credential.accessToken;
+
+      console.log('fb user after sign in',user);
+    })
+      .catch((error) => {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+      });
+  }
+
+  // code for sign out
   const handleSignOut = () => {
     // console.log('singed out');
     firebase.auth().signOut()
@@ -63,6 +89,7 @@ function App() {
       })
   }
 
+  // getting form values
   const handleBlur = (e) => {
     // detecting the field and value
     // console.log(e.target.name, e.target.value);
@@ -93,6 +120,7 @@ function App() {
     }
   }
 
+  // code for submit button
   const handleSubmit = (e) => {
     console.log(user.email, user.password);
     if (user.email && user.password) {
@@ -132,6 +160,7 @@ function App() {
           setUser(newUserInfo);
         });
     }
+    // getting user name
     const updateUserName = name => {
       const user = firebase.auth().currentUser;
 
@@ -155,6 +184,8 @@ function App() {
         user.isSignedIn ? <button onClick={handleSignOut}>Sign Out</button> :
           <button onClick={handleSignIn}>Sign In</button>
       }
+      <br />
+      <button onClick={handleFBSignIn}>Log in using Facebook</button>
       {
         user.isSignedIn && <div>
           <p>Welcome, {user.name}</p>
